@@ -7,3 +7,7 @@
 [user]
 	email = mina26b8@gmail.com
 	name = minaboktor2628
+[init]
+	defaultBranch = main
+[core]
+    editor = vim
