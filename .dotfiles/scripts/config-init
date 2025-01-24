@@ -19,7 +19,6 @@ else
 fi
 
 # run packages script
-
 ./packages.sh
 
 # checkout dotfiles from repo

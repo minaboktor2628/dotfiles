@@ -70,7 +70,12 @@ ENABLE_CORRECTION="true"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git zsh-syntax-highlighting)
+plugins=(
+  git
+  zsh-syntax-highlighting
+  zsh-interactive-cd
+  fzf
+)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -111,6 +116,23 @@ alias vim=nvim
 # directory where you created the repo above.
 alias config="git --git-dir=$HOME/.dotfiles --work-tree=$HOME"
 
+# save package to history
+function savepkg() {
+    echo "$1" >> ~/.dotfiles/scripts/apt_packages.txt
+    echo "Package '$1' added to ~/.dotfiles/scripts/apt_packages.txt"
+}
+
+# make a new dir and cd into it
+function mkcd(){
+  mkdir $1 && cd $1
+}
+
+# download and add package to history
+function addpkg(){
+  sudo apt install -y $1
+  echo "$1" >> ~/.dotfiles/scripts/apt_packages.txt
+  echo "Package '$1' added to ~/.dotfiles/scripts/apt_packages.txt"
+}
 
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
@@ -124,7 +146,7 @@ case ":$PATH:" in
 esac
 # pnpm end
 export PATH=$PATH:/usr/local/go/bin
-export PATH="$PATH:$HOME/bin/terminal_search"
+export PATH="$PATH:$HOME/bin/terminal_search" # lookup
 export PATH="$PATH:$HOME/bin/generate"
 
 #THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
