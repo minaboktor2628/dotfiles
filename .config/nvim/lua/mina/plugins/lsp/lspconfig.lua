@@ -1,10 +1,22 @@
 return {
+  -- Main LSP Configuration
   "neovim/nvim-lspconfig",
-  event = { "BufReadPre", "BufNewFile" },
   dependencies = {
+    -- Automatically install LSPs and related tools to stdpath for Neovim
+    { "williamboman/mason.nvim", config = true }, -- NOTE: Must be loaded before dependants
+    "williamboman/mason-lspconfig.nvim",
+    "WhoIsSethDaniel/mason-tool-installer.nvim",
+
+    -- Useful status updates for LSP.
+    -- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
+    { "j-hui/fidget.nvim", opts = {} },
+
+    -- Allows extra capabilities provided by nvim-cmp
     "hrsh7th/cmp-nvim-lsp",
-    { "antosha417/nvim-lsp-file-operations", config = true },
-    { "folke/neodev.nvim", opts = {} },
+    "hrsh7th/cmp-vsnip",
+    "hrsh7th/vim-vsnip",
+    "hrsh7th/cmp-path",
+    "hrsh7th/nvim-cmp",
   },
   config = function()
     -- import lspconfig plugin
@@ -15,6 +27,10 @@ return {
 
     -- import cmp-nvim-lsp plugin
     local cmp_nvim_lsp = require("cmp_nvim_lsp")
+
+    local cmp = require("cmp")
+    local luasnip = require("luasnip")
+    luasnip.config.setup({})
 
     local keymap = vim.keymap -- for conciseness
 
@@ -53,17 +69,28 @@ return {
         opts.desc = "Show line diagnostics"
         keymap.set("n", "<leader>d", vim.diagnostic.open_float, opts) -- show diagnostics for line
 
-        opts.desc = "Go to previous diagnostic"
-        keymap.set("n", "[d", vim.diagnostic.goto_prev, opts) -- jump to previous diagnostic in buffer
-
-        opts.desc = "Go to next diagnostic"
-        keymap.set("n", "]d", vim.diagnostic.goto_next, opts) -- jump to next diagnostic in buffer
-
+        -- opts.desc = "Go to previous diagnostic"
+        -- keymap.set("n", "[d", vim.diagnostic.goto_prev, opts) -- jump to previous diagnostic in buffer
+        --
+        -- opts.desc = "Go to next diagnostic"
+        -- keymap.set("n", "]d", vim.diagnostic.goto_next, opts) -- jump to next diagnostic in buffer
+        --
         opts.desc = "Show documentation for what is under cursor"
         keymap.set("n", "K", vim.lsp.buf.hover, opts) -- show documentation for what is under cursor
 
         opts.desc = "Restart LSP"
         keymap.set("n", "<leader>rs", ":LspRestart<CR>", opts) -- mapping to restart lsp if necessary
+        local client = vim.lsp.get_client_by_id(ev.data.client_id)
+
+        local map = function(keys, func, desc)
+          vim.keymap.set("n", keys, func, { buffer = ev.buf, desc = "LSP: " .. desc })
+        end
+
+        if client and client.supports_method(vim.lsp.protocol.Methods.textDocument_inlayHint) then
+          map("<leader>th", function()
+            vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = ev.buf }))
+          end, "[T]oggle Inlay [H]ints")
+        end
       end,
     })
 
@@ -77,6 +104,86 @@ return {
       local hl = "DiagnosticSign" .. type
       vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = "" })
     end
+
+    cmp.setup({
+      snippet = {
+        expand = function(args)
+          luasnip.lsp_expand(args.body)
+        end,
+      },
+      completion = { completeopt = "menu,menuone,noinsert" },
+
+      -- For an understanding of why these mappings were
+      -- chosen, you will need to read `:help ins-completion`
+      --
+      -- No, but seriously. Please read `:help ins-completion`, it is really good!
+      mapping = cmp.mapping.preset.insert({
+        -- Select the [n]ext item
+        ["<C-n>"] = cmp.mapping.select_next_item(),
+        -- Select the [p]revious item
+        ["<C-p>"] = cmp.mapping.select_prev_item(),
+
+        -- Scroll the documentation window [b]ack / [f]orward
+        ["<C-b>"] = cmp.mapping.scroll_docs(-4),
+        ["<C-f>"] = cmp.mapping.scroll_docs(4),
+
+        -- Accept ([y]es) the completion.
+        --  This will auto-import if your LSP supports it.
+        --  This will expand snippets if the LSP sent a snippet.
+        ["<C-y>"] = cmp.mapping.confirm({ select = true }),
+
+        -- If you prefer more traditional completion keymaps,
+        -- you can uncomment the following lines
+        --['<CR>'] = cmp.mapping.confirm { select = true },
+        --['<Tab>'] = cmp.mapping.select_next_item(),
+        --['<S-Tab>'] = cmp.mapping.select_prev_item(),
+
+        -- Manually trigger a completion from nvim-cmp.
+        --  Generally you don't need this, because nvim-cmp will display
+        --  completions whenever it has completion options available.
+        ["<C-Space>"] = cmp.mapping.complete({}),
+
+        -- Think of <c-l> as moving to the right of your snippet expansion.
+        --  So if you have a snippet that's like:
+        --  function $name($args)
+        --    $body
+        --  end
+        --
+        -- <c-l> will move you to the right of each of the expansion locations.
+        -- <c-h> is similar, except moving you backwards.
+        ["<C-l>"] = cmp.mapping(function()
+          if luasnip.expand_or_locally_jumpable() then
+            luasnip.expand_or_jump()
+          end
+        end, { "i", "s" }),
+        ["<C-h>"] = cmp.mapping(function()
+          if luasnip.locally_jumpable(-1) then
+            luasnip.jump(-1)
+          end
+        end, { "i", "s" }),
+
+        -- cmp.setup.filetype({ 'sql' }, {
+        --   sources = {
+        --     { name = 'vim-dadbod-completion' },
+        --     { name = 'buffer' },
+        --   },
+        -- }),
+        -- For more advanced Luasnip keymaps (e.g. selecting choice nodes, expansion) see:
+        --    https://github.com/L3MON4D3/LuaSnip?tab=readme-ov-file#keymaps
+      }),
+      sources = {
+        {
+          name = "lazydev",
+          -- set group index to 0 to skip loading LuaLS completions as lazydev recommends it
+          group_index = 0,
+        },
+        -- { name = 'vim-dadbod-completion' },
+        { name = "nvim_lsp" },
+        { name = "vsnip" },
+        { name = "luasnip" },
+        { name = "path" },
+      },
+    })
 
     mason_lspconfig.setup_handlers({
       -- default handler for installed servers
@@ -134,4 +241,3 @@ return {
     })
   end,
 }
-

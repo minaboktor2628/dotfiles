@@ -2,16 +2,34 @@ vim.cmd("let g:netrw_liststyle = 3")
 
 local opt = vim.opt
 
+vim.g.have_nerd_font = true
+
+vim.api.nvim_create_autocmd("TextYankPost", {
+  desc = "Highlight when yanking (copying) text",
+  group = vim.api.nvim_create_augroup("kickstart-highlight-yank", { clear = true }),
+  callback = function()
+    vim.highlight.on_yank()
+  end,
+})
+
 opt.relativenumber = true
 opt.number = true
+
+opt.showmode = false
 
 -- tabs & indentation
 opt.tabstop = 2 -- 2 spaces for tabs (prettier default)
 opt.shiftwidth = 2 -- 2 spaces for indent width
 opt.expandtab = true -- expand tab to spaces
 opt.autoindent = true -- copy indent from current line when starting new one
+opt.softtabstop = 2 -- Number of spaces that a <Tab> counts for while editing
 
-opt.wrap = false
+opt.breakindent = true
+opt.undofile = true
+
+-- opt.wrap = false
+opt.list = true
+opt.listchars = { tab = "» ", trail = "·", nbsp = "␣" }
 
 -- search settings
 opt.ignorecase = true -- ignore case when searching
