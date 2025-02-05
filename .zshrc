@@ -74,6 +74,7 @@ plugins=(
   git
   zsh-syntax-highlighting
   zsh-interactive-cd
+  gh
   fzf
 )
 
@@ -87,11 +88,11 @@ source $ZSH/oh-my-zsh.sh
 # export LANG=en_US.UTF-8
 
 # Preferred editor for local and remote sessions
-# if [[ -n $SSH_CONNECTION ]]; then
-#   export EDITOR='vim'
-# else
-#   export EDITOR='mvim'
-# fi
+if [[ -n $SSH_CONNECTION ]]; then
+  export EDITOR='vim'
+else
+  export EDITOR='nvim'
+fi
 
 # Compilation flags
 # export ARCHFLAGS="-arch $(uname -m)"
@@ -152,3 +153,8 @@ export PATH="$PATH:$HOME/bin/generate"
 #THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
 export SDKMAN_DIR="$HOME/.sdkman"
 [[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
+
+
+export PATH="$HOME/.local/lib/python3.10/site-packages:$PATH"
+export PATH="$PATH:$HOME/.local/bin"
+

@@ -8,7 +8,7 @@ return {
     -- Setup nvim-notify
     notify.setup({
       stages = "fade_in_slide_out", -- Animation style for notifications
-      timeout = 3000, -- Time in milliseconds for notifications to disappear
+      timeout = 2000, -- Time in milliseconds for notifications to disappear
       background_colour = "#282c34", -- Background color for notifications
       fps = 60, -- Animation frames per second
       icons = {

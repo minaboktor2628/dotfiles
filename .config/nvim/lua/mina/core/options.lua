@@ -1,4 +1,4 @@
-vim.cmd("let g:netrw_liststyle = 3")
+-- vim.cmd("let g:netrw_liststyle = 3")
 
 local opt = vim.opt
 
@@ -14,6 +14,9 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 
 opt.relativenumber = true
 opt.number = true
+
+vim.opt.spelllang = "en_us"
+vim.opt.spell = true
 
 opt.showmode = false
 
