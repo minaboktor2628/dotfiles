@@ -55,6 +55,20 @@ return {
         theme = my_lualine_theme,
       },
       sections = {
+        lualine_c = {
+          "filename",
+          {
+            function()
+              local wc = vim.fn.wordcount()
+              return "Words: " .. wc.words
+            end,
+            cond = function()
+              local ft = vim.bo.filetype
+              local name = vim.api.nvim_buf_get_name(0)
+              return ft == "text" or name:match("%.txt$") ~= nil
+            end,
+          },
+        },
         lualine_x = {
           {
             lazy_status.updates,

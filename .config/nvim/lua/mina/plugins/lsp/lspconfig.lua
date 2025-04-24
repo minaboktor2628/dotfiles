@@ -24,7 +24,7 @@ return {
 
     -- import mason_lspconfig plugin
     local mason_lspconfig = require("mason-lspconfig")
-
+    lspconfig.racket_langserver.setup({})
     -- import cmp-nvim-lsp plugin
     local cmp_nvim_lsp = require("cmp_nvim_lsp")
 

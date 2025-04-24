@@ -20,11 +20,22 @@ return {
         liquid = { "prettier" },
         lua = { "stylua" },
         python = { "isort", "black" },
+        bib = { "bibtex-tidy" },
+        tex = { "latexindent" },
+        plaintex = { "latexindent" },
+        -- racket = { "raco_fmt" },
       },
+      -- formatters = {
+      --   raco_fmt = {
+      --     command = "raco",
+      --     args = { "fmt", "-i", "$FILENAME" },
+      --     stdin = false,
+      --   },
+      -- },
       format_on_save = {
         lsp_fallback = true,
         async = false,
-        timeout_ms = 1000,
+        timeout_ms = 2000,
       },
     })
 

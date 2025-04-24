@@ -8,18 +8,22 @@ return {
   config = function()
     -- import nvim-treesitter plugin
     local treesitter = require("nvim-treesitter.configs")
+    require("nvim-ts-autotag").setup({
+      opts = {
+        -- Defaults
+        enable_close = true, -- Auto close tags
+        enable_rename = true, -- Auto rename pairs of tags
+        enable_close_on_slash = false, -- Auto close on trailing </
+      },
+    })
 
     -- configure treesitter
     treesitter.setup({ -- enable syntax highlighting
-      highlight = {
-        enable = true,
-      },
+      highlight = { enable = true },
       -- enable indentation
       indent = { enable = true },
       -- enable autotagging (w/ nvim-ts-autotag plugin)
-      autotag = {
-        enable = true,
-      },
+      autotag = { enable = true },
       -- ensure these language parsers are installed
       ensure_installed = {
         "json",
@@ -41,6 +45,7 @@ return {
         "gitignore",
         "query",
         "vimdoc",
+        "racket",
         "c",
       },
       incremental_selection = {
