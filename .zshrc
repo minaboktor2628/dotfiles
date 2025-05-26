@@ -1,4 +1,3 @@
-# If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:$HOME/.local/bin:/usr/local/bin:$PATH
 
 # Path to your Oh My Zsh installation.
@@ -40,7 +39,7 @@ ZSH_THEME="robbyrussell"
 # Uncomment the following line to disable auto-setting terminal title.
 # DISABLE_AUTO_TITLE="true"
 
-# Uncomment the following line to enable command auto-correction.
+# Uncomment the following line to enab
 ENABLE_CORRECTION="true"
 
 # Uncomment the following line to display red dots whilst waiting for completion.
@@ -72,11 +71,20 @@ ENABLE_CORRECTION="true"
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(
   git
+  colorize
   zsh-syntax-highlighting
   zsh-interactive-cd
+  colored-man-pages
+  man
+  zsh-autosuggestions
+  tmux
+  pip
+  tldr
   gh
   fzf
+  web-search
 )
+ZSH_COLORIZE_STYLE="monokai"
 
 source $ZSH/oh-my-zsh.sh
 
@@ -106,12 +114,15 @@ fi
 # For a full list of active aliases, run `alias`.
 #
 # Example aliases
-# alias zshconfig="mate ~/.zshrc"
+alias zshconfig="vim ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 alias ls="lsd"
 alias la="lsd -a"
+alias c="clear"
 alias lla="lsd -la"
-alias vim=nvim
+alias vim="nvim"
+alias src="source ~/.zshrc"
+
 
 # make sure the --git-dir is the same as the
 # directory where you created the repo above.
@@ -121,6 +132,13 @@ alias config="git --git-dir=$HOME/.dotfiles --work-tree=$HOME"
 function savepkg() {
     echo "$1" >> ~/.dotfiles/scripts/apt_packages.txt
     echo "Package '$1' added to ~/.dotfiles/scripts/apt_packages.txt"
+}
+
+# function to add commit and push code
+function gitall(){
+  git add .
+  git commit -m "$1"
+  git push
 }
 
 # make a new dir and cd into it
@@ -158,3 +176,7 @@ export SDKMAN_DIR="$HOME/.sdkman"
 export PATH="$HOME/.local/lib/python3.10/site-packages:$PATH"
 export PATH="$PATH:$HOME/.local/bin"
 
+# export DISPLAY=$(grep -oP "(?<=nameserver ).+" /etc/resolv.conf):0.0
+# export DISPLAY=$(awk '/nameserver/ {print $2; exit}' /etc/resolv.conf):0
+
+export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
