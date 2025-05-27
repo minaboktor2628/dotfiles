@@ -40,7 +40,7 @@ ZSH_THEME="robbyrussell"
 # DISABLE_AUTO_TITLE="true"
 
 # Uncomment the following line to enab
-ENABLE_CORRECTION="true"
+# ENABLE_CORRECTION="true"
 
 # Uncomment the following line to display red dots whilst waiting for completion.
 # You can also set it to another string to have that shown instead of the default red dots.
@@ -123,10 +123,6 @@ alias lla="lsd -la"
 alias vim="nvim"
 alias src="source ~/.zshrc"
 
-
-# make sure the --git-dir is the same as the
-# directory where you created the repo above.
-alias config="git --git-dir=$HOME/.dotfiles --work-tree=$HOME"
 
 # save package to history
 function savepkg() {
