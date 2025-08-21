@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # ---- Config you can override via env ----
-ANSIBLE_REPO="${ANSIBLE_REPO:-https://github.com/minaboktor2628/dotfiles.git}"
+ANSIBLE_REPO="${ANSIBLE_REPO:-git@github.com:minaboktor2628/dotfiles.git}"
 BRANCH="${BRANCH:-main}"
 PLAYBOOK="${PLAYBOOK:-.config/ansible/local.yml}"
 DEST_DIR="${DEST_DIR:-/home/ansible/.local/share/ansible-pull}"
