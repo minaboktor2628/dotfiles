@@ -4,6 +4,15 @@ return {
   build = ":TSUpdate",
   dependencies = {
     "windwp/nvim-ts-autotag",
+    {
+      "nvim-treesitter/nvim-treesitter-context",
+      opts = {
+        enable = true,
+        max_lines = 2,
+        mode = "topline",
+        trim_scope = "outer",
+      },
+    },
   },
   config = function()
     -- import nvim-treesitter plugin

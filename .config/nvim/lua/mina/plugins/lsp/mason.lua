@@ -36,6 +36,8 @@ return {
         "emmet_ls",
         "prismals",
         "pyright",
+        "eslint",
+        "ts_ls",
       },
     })
 

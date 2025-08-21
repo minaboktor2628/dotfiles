@@ -1,0 +1,265 @@
+---
+- hosts: localhost
+  connection: local
+  become: true
+
+  vars:
+    user: "{{ user | default(lookup('env','USER'), true) }}"
+    home: "/home/{{ user }}"
+    set_zsh_default: true
+    install_pygments: true
+    lazygit_version: "latest" # set to a specific version like "0.44.1" to pin
+
+    # Base packages by family
+    base_packages_debian:
+      - git
+      - tmux
+      - bash
+      - bc
+      - coreutils
+      - gawk
+      - jq
+      - playerctl
+      - neovim
+      - ripgrep
+      - postgresql
+      - lsd
+      - docker.io
+      - zsh
+      - fzf
+      - curl
+      - tar
+      - python3-pip
+      - ca-certificates
+      - apt-transport-https
+      - gnupg
+      - software-properties-common
+      - unzip
+      - xz-utils
+      - build-essential
+      - pkg-config
+      - libssl-dev
+      - lazygit # available on Ubuntu 22.04+/Debian testing; harmless if not found
+    base_packages_redhat:
+      - git
+      - tmux
+      - bash
+      - bc
+      - coreutils
+      - gawk
+      - jq
+      - neovim
+      - ripgrep
+      - postgresql
+      - zsh
+      - fzf
+      - curl
+      - tar
+      - python3-pip
+      - ca-certificates
+      - unzip
+      - xz
+      - make
+      - gcc
+      - openssl-devel
+    base_packages_arch:
+      - git
+      - tmux
+      - bash
+      - bc
+      - coreutils
+      - gawk
+      - jq
+      - playerctl
+      - neovim
+      - ripgrep
+      - postgresql
+      - lsd
+      - docker
+      - zsh
+      - fzf
+      - curl
+      - tar
+      - python-pip
+      - unzip
+      - xz
+      - base-devel
+      - openssl
+      - lazygit
+
+  tasks:
+    - name: Ensure user home exists (useful on some minimal systems)
+      file:
+        path: "{{ home }}"
+        state: directory
+        owner: "{{ user }}"
+        group: "{{ user }}"
+        mode: "0755"
+
+    - name: Install base packages (Debian/Ubuntu)
+      package:
+        name: "{{ base_packages_debian }}"
+        state: present
+      when: ansible_facts['os_family'] == 'Debian'
+
+    - name: Install base packages (RedHat/Fedora/CentOS/RHEL)
+      package:
+        name: "{{ base_packages_redhat }}"
+        state: present
+      when: ansible_facts['os_family'] == 'RedHat'
+
+    - name: Install base packages (Arch)
+      pacman:
+        name: "{{ base_packages_arch }}"
+        state: present
+      when: ansible_facts['os_family'] == 'Archlinux'
+
+    # --- oh-my-zsh (headless) ---
+    - name: Check if oh-my-zsh is installed
+      stat:
+        path: "{{ home }}/.oh-my-zsh"
+      register: omz
+
+    - name: Install oh-my-zsh (RUNZSH=no CHSH=no, idempotent)
+      become: false
+      shell: |
+        export RUNZSH=no
+        export CHSH=no
+        sh -c "$(curl -fsSL https://install.ohmyz.sh/)"
+      args:
+        creates: "{{ home }}/.oh-my-zsh"
+      environment:
+        HOME: "{{ home }}"
+      when: not omz.stat.exists
+
+    # --- zsh default shell (optional) ---
+    - name: Ensure {{ user }} shell is zsh
+      user:
+        name: "{{ user }}"
+        shell: /usr/bin/zsh
+      when: set_zsh_default
+
+    # --- zsh plugins ---
+    - name: Ensure zsh-autosuggestions plugin is installed
+      become: false
+      git:
+        repo: "https://github.com/zsh-users/zsh-autosuggestions"
+        dest: "{{ home }}/.oh-my-zsh/custom/plugins/zsh-autosuggestions"
+        update: yes
+        version: master
+      environment:
+        HOME: "{{ home }}"
+      when: omz.stat.exists
+
+    - name: Install Pygments (for oh-my-zsh colorize plugin)
+      pip:
+        name: Pygments
+        executable: pip3
+        state: present
+      when: install_pygments
+
+    # --- tmux plugin manager (tpm) ---
+    - name: Ensure tmux plugin manager (tpm) is installed
+      become: false
+      git:
+        repo: "https://github.com/tmux-plugins/tpm"
+        dest: "{{ home }}/.tmux/plugins/tpm"
+        update: yes
+        version: master
+      environment:
+        HOME: "{{ home }}"
+
+    # --- rustup ---
+    - name: Check for rustup
+      become: false
+      stat:
+        path: "{{ home }}/.cargo/bin/rustup"
+      register: rustup_stat
+
+    - name: Install Rust (rustup -y)
+      become: false
+      shell: |
+        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+      args:
+        executable: /bin/bash
+      environment:
+        HOME: "{{ home }}"
+      when: not rustup_stat.stat.exists
+
+    # --- pnpm ---
+    - name: Check for pnpm
+      become: false
+      stat:
+        path: "{{ home }}/.local/share/pnpm/pnpm"
+      register: pnpm_stat
+
+    - name: Install pnpm
+      become: false
+      shell: |
+        curl -fsSL https://get.pnpm.io/install.sh | sh -
+      args:
+        executable: /bin/bash
+      environment:
+        HOME: "{{ home }}"
+      when: not pnpm_stat.stat.exists
+
+    # --- lazygit fallback installer (only if package missing/old) ---
+    - name: Check if lazygit already installed
+      become: false
+      command: bash -lc "command -v lazygit"
+      register: lazygit_cmd
+      failed_when: false
+      changed_when: false
+
+    - name: Get latest lazygit version (if requested)
+      when: lazygit_version == "latest" and lazygit_cmd.rc != 0
+      become: false
+      uri:
+        url: https://api.github.com/repos/jesseduffield/lazygit/releases/latest
+        return_content: yes
+        headers:
+          Accept: application/vnd.github+json
+      register: lazygit_api
+
+    - name: Set lazygit_version fact from API
+      when: lazygit_version == "latest" and lazygit_cmd.rc != 0
+      set_fact:
+        lazygit_version_resolved: "{{ (lazygit_api.json.tag_name | regex_replace('^v', '')) }}"
+      vars: {}
+    - name: Set lazygit_version fallback when pinned
+      when: lazygit_version != "latest"
+      set_fact:
+        lazygit_version_resolved: "{{ lazygit_version }}"
+
+    - name: Download lazygit tarball (Linux x86_64)
+      when: lazygit_cmd.rc != 0
+      get_url:
+        url: "https://github.com/jesseduffield/lazygit/releases/download/v{{ lazygit_version_resolved }}/lazygit_{{ lazygit_version_resolved }}_Linux_x86_64.tar.gz"
+        dest: "/tmp/lazygit.tar.gz"
+        mode: "0644"
+
+    - name: Extract lazygit binary
+      when: lazygit_cmd.rc != 0
+      unarchive:
+        src: "/tmp/lazygit.tar.gz"
+        dest: "/tmp/lazygit"
+        remote_src: yes
+        creates: "/tmp/lazygit/lazygit"
+
+    - name: Install lazygit to /usr/local/bin
+      when: lazygit_cmd.rc != 0
+      copy:
+        src: "/tmp/lazygit/lazygit"
+        dest: "/usr/local/bin/lazygit"
+        owner: root
+        group: root
+        mode: "0755"
+
+    # --- Ensure Docker service is enabled when present ---
+    - name: Enable and start Docker if installed
+      service:
+        name: docker
+        state: started
+        enabled: true
+      ignore_errors: true # harmless on systems without service units (e.g., WSL)
+
