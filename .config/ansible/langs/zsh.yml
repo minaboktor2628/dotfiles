@@ -1,35 +1,51 @@
 ---
-- name: Install zsh
-  ansible.builtin.apt:
-    name: zsh
-    state: present
+- name: Ensure base deps
   become: yes
+  ansible.builtin.apt:
+    name:
+      - zsh
+      - git
+      - curl
+    state: present
+    update_cache: yes
 
+# Change default shell (kept separate from installer script)
+- name: Set default shell to zsh for {{ target_user }}
+  become: yes
+  ansible.builtin.user:
+    name: "{{ target_user }}"
+    shell: /usr/bin/zsh
+
+# Install Oh My Zsh (non-interactive), as the target user
 - name: Install oh-my-zsh (if not already installed)
-  become: false
+  become: yes
+  become_user: "{{ target_user }}"
   ansible.builtin.shell: |
     set -e
     export ZSH="{{ target_home }}/.oh-my-zsh"
     if [ ! -d "$ZSH" ]; then
-      RUNZSH=no KEEP_ZSHRC=yes \
+      RUNZSH=no KEEP_ZSHRC=yes CHSH=no \
       sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
     fi
   args:
     executable: /bin/bash
-  changed_when: false
-  environment:
-    HOME: "{{ target_home }}"
+    creates: "{{ target_home }}/.oh-my-zsh/oh-my-zsh.sh"
 
-- name: Set default shell to zsh for current user
-  ansible.builtin.user:
-    name: "{{ target_user }}"
-    shell: /usr/bin/zsh
-  become: yes
-
+# Plugins — install both, as the target user (no root-owned files in $HOME)
 - name: Install zsh-autosuggestions plugin
+  become: yes
+  become_user: "{{ target_user }}"
   ansible.builtin.git:
-    repo: https://github.com/zsh-users/zsh-autosuggestions
+    repo: https://github.com/zsh-users/zsh-autosuggestions.git
     dest: "{{ target_home }}/.oh-my-zsh/custom/plugins/zsh-autosuggestions"
     version: master
     update: yes
-  become: false
+
+- name: Install zsh-syntax-highlighting plugin (must be last in plugins=())
+  become: yes
+  become_user: "{{ target_user }}"
+  ansible.builtin.git:
+    repo: https://github.com/zsh-users/zsh-syntax-highlighting.git
+    dest: "{{ target_home }}/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting"
+    version: master
+    update: yes

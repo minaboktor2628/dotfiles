@@ -1,40 +1,56 @@
 ---
+# Defaultable var for Node.js major (or full) version
+- name: Set desired Node.js version (default 22)
+  ansible.builtin.set_fact:
+    node_version: "{{ node_version | default('22') }}"
+  changed_when: false
+
+# Install NVM once
 - name: Install NVM
-  become: false
+  become: yes
+  become_user: "{{ target_user }}"
   ansible.builtin.shell: |
     set -e
     export NVM_DIR="{{ target_home }}/.nvm"
-    if [ ! -d "$NVM_DIR" ]; then
-      curl -fsSL "https://raw.githubusercontent.com/nvm-sh/nvm/{{ nvm_version }}/install.sh" | bash
+    if [ ! -s "$NVM_DIR/nvm.sh" ]; then
+      curl -fsSL "https://raw.githubusercontent.com/nvm-sh/nvm/{{ nvm_version | default('v0.39.7') }}/install.sh" | bash
     fi
+  args:
+    executable: /bin/bash
+    creates: "{{ target_home }}/.nvm/nvm.sh"
+  environment:
+    HOME: "{{ target_home }}"
+    USER: "{{ target_user }}"
+
+# Install Node and set as default (uses the var)
+- name: Install Node {{ node_version }} via NVM and set default
+  become: yes
+  become_user: "{{ target_user }}"
+  ansible.builtin.shell: |
+    set -e
+    export NVM_DIR="{{ target_home }}/.nvm"
+    . "$NVM_DIR/nvm.sh"
+    nvm ls "{{ node_version }}" >/dev/null 2>&1 || nvm install "{{ node_version }}"
+    nvm alias default "{{ node_version }}"
+    nvm use default
   args:
     executable: /bin/bash
   environment:
     HOME: "{{ target_home }}"
     USER: "{{ target_user }}"
 
-- name: Install Node LTS via NVM and set default
-  become: false
-  ansible.builtin.shell: |
-    set -e
-    export NVM_DIR="{{ target_home }}/.nvm"
-    [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-    nvm install "{{ node_lts }}"
-    nvm alias default "{{ node_lts }}"
-    nvm use default
-  args:
-    executable: /bin/bash
-  environment:
-    HOME: "{{ target_home }}"
-
+# pnpm
 - name: Install pnpm globally via npm
-  become: false
+  become: yes
+  become_user: "{{ target_user }}"
   ansible.builtin.shell: |
     set -e
     export NVM_DIR="{{ target_home }}/.nvm"
-    [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+    . "$NVM_DIR/nvm.sh"
+    nvm use default >/dev/null
     npm i -g pnpm
   args:
     executable: /bin/bash
   environment:
     HOME: "{{ target_home }}"
+    USER: "{{ target_user }}"
