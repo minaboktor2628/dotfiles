@@ -125,14 +125,14 @@ sudo_do "mkdir -p '$DEST_DIR' && chown -R $AUTOMATION_USER:$AUTOMATION_USER '$(d
 # =========================
 # Load secrets (GitHub token)
 # =========================
-if [ -f "$HOME/.config/yadm/secrets/github.env" ]; then
-  export $(grep -v '^#' "$HOME/.config/yadm/secrets/github.env" | xargs)
-fi
-
-if [ -z "${GITHUB_TOKEN:-}" ]; then
-  echo "ERROR: GITHUB_TOKEN is not set. Make sure yadm secrets decrypted github.env" >&2
-  exit 1
-fi
+# if [ -f "$HOME/.config/yadm/secrets/github.env" ]; then
+#   export $(grep -v '^#' "$HOME/.config/yadm/secrets/github.env" | xargs)
+# fi
+#
+# if [ -z "${GITHUB_TOKEN:-}" ]; then
+#   echo "ERROR: GITHUB_TOKEN is not set. Make sure yadm secrets decrypted github.env" >&2
+#   exit 1
+# fi
 
 # =========================
 # Trust GitHub host key for ansible user
