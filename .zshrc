@@ -130,7 +130,7 @@ function mkcd(){
 
 # run this after "yadm pull"
 function sync-ansible(){
-  ANSIBLE_NOCOWS=1 ansible-playbook -i "localhost," -c local ~/.config/ansible/local.yml --become
+  ANSIBLE_NOCOWS=1 ansible-playbook -i "localhost," -c local ~/.config/ansible/local.yml --become -K
 }
 
 export NVM_DIR="$HOME/.nvm"
