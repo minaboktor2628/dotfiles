@@ -7,16 +7,6 @@
     nvim_symlink: "/usr/local/bin/nvim"
     nvim_tar: "/tmp/nvim-{{ (ansible_architecture == 'aarch64') | ternary('linux-arm64','linux-x86_64') }}.tar.gz"
 
-- name: Ensure deps for tar/unzip
-  ansible.builtin.apt:
-    name:
-      - tar
-      - gzip
-      - ca-certificates
-      - curl
-    state: present
-    update_cache: yes
-
 - name: Download Neovim {{ nvim_version }} tarball
   ansible.builtin.get_url:
     url: "https://github.com/neovim/neovim/releases/download/{{ nvim_version }}/nvim-{{ nvim_arch }}.tar.gz"
