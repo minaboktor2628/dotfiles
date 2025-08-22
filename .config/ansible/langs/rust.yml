@@ -1,28 +1,31 @@
 ---
 - name: Install Rust via rustup
   become: false
-  shell: |
+  ansible.builtin.shell: |
     set -e
     if ! command -v rustup >/dev/null 2>&1; then
       curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
     fi
   args:
     executable: /bin/bash
+  environment:
+    HOME: "{{ target_home }}"
+    USER: "{{ target_user }}"
 
 - name: Ensure cargo on PATH
   become: false
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: "{{ item }}"
     create: yes
-    line: 'export PATH="$HOME/.cargo/bin:$PATH"'
+    line: 'export PATH="{{ target_home }}/.cargo/bin:$PATH"'
     state: present
   loop:
-    - "{{ ansible_env.HOME }}/.bashrc"
-    - "{{ ansible_env.HOME }}/.zshrc"
+    - "{{ target_home }}/.bashrc"
+    - "{{ target_home }}/.zshrc"
 
 - name: Update toolchains (idempotent)
   become: false
-  shell: |
+  ansible.builtin.shell: |
     set -e
     if command -v rustup >/dev/null 2>&1; then
       rustup toolchain install stable
@@ -32,3 +35,5 @@
   args:
     executable: /bin/bash
   changed_when: false
+  environment:
+    HOME: "{{ target_home }}"

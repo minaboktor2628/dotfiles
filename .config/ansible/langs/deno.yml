@@ -1,21 +1,24 @@
 ---
-- name: Install Deno
+- name: Install Deno (if not already installed)
   become: false
-  shell: |
+  ansible.builtin.shell: |
     set -e
     if ! command -v deno >/dev/null 2>&1; then
       curl -fsSL https://deno.land/install.sh | sh
     fi
   args:
     executable: /bin/bash
+  environment:
+    HOME: "{{ target_home }}"
+    USER: "{{ target_user }}"
 
 - name: Ensure Deno is on PATH in shells
   become: false
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: "{{ item }}"
     create: yes
     line: 'export DENO_INSTALL="$HOME/.deno"; export PATH="$DENO_INSTALL/bin:$PATH"'
     state: present
   loop:
-    - "{{ ansible_env.HOME }}/.bashrc"
-    - "{{ ansible_env.HOME }}/.zshrc"
+    - "{{ target_home }}/.bashrc"
+    - "{{ target_home }}/.zshrc"

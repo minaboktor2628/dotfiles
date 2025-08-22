@@ -1,5 +1,6 @@
 ---
 - name: Install Go via apt
-  apt:
+  ansible.builtin.apt:
     name: golang
     state: present
+  become: yes

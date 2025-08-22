@@ -3,53 +3,39 @@
   hosts: localhost
   connection: local
   gather_facts: yes
-  become: yes
+
+  # IMPORTANT: don't become at the play level so $HOME stays your user.
+  become: false
 
   vars:
-    dotfiles_repo_url: "https://github.com/minaboktor2628/dotfiles.git"
-    ansible_user_name: "ansible"
-    ansible_user_home: "/home/ansible"
-    tpm_dir: "{{ ansible_env.HOME }}/.tmux/plugins/tpm"
+    # Resolve your actual user/home even if some tasks escalate later.
+    target_user: "{{ lookup('env','USER') }}"
+    target_home: "{{ lookup('env','HOME') }}"
+
+    # Tooling versions/paths
+    tpm_dir: "{{ target_home }}/.tmux/plugins/tpm"
     nvm_version: "v0.39.7"
     node_lts: "lts/*"
 
   pre_tasks:
-    - name: Ensure 'ansible' user exists
-      user:
-        name: "{{ ansible_user_name }}"
-        shell: /bin/bash
-        create_home: yes
-
-    - name: Allow 'ansible' user passwordless sudo for apt/ansible
-      copy:
-        dest: /etc/sudoers.d/99-ansible
-        mode: "0440"
-        content: |
-          {{ ansible_user_name }} ALL=(ALL) NOPASSWD: /usr/bin/apt, /usr/bin/apt-get, /usr/bin/ansible, /usr/bin/ansible-pull
+    - name: Show who/where we are installing to
+      ansible.builtin.debug:
+        msg:
+          - "user: {{ target_user }}"
+          - "home: {{ target_home }}"
 
   tasks:
+    # Common base (inside this file, use become: yes only where needed)
     - name: Common base
-      include_tasks: "tasks/common.yml"
+      ansible.builtin.include_tasks: "tasks/common.yml"
 
     # Language/tool modules (auto-include everything in langs/)
     - name: Include all language setup files from langs/
-      include_tasks: "{{ item }}"
+      ansible.builtin.include_tasks: "{{ item }}"
       loop: "{{ lookup('fileglob', playbook_dir + '/langs/*.yml', wantlist=True) | sort }}"
       loop_control:
         label: "{{ item | basename }}"
 
     # Neovim (split out if you want)
     - name: Install Neovim and friends
-      include_tasks: "tasks/neovim.yml"
-
-    # Cron to re-sync daily as 'ansible' user
-    - name: Ensure daily ansible-pull cron for 'ansible' user
-      cron:
-        name: "Daily dotfiles+ansible sync"
-        user: "{{ ansible_user_name }}"
-        special_time: daily
-        job: >
-          /usr/bin/ansible-pull -U {{ dotfiles_repo_url }}
-          -d {{ ansible_user_home }}/.config/ansible
-          -i "localhost," {{ ansible_user_home }}/.config/ansible/local.yml -o
-          --accept-host-key
+      ansible.builtin.include_tasks: "tasks/neovim.yml"

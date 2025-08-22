@@ -123,30 +123,14 @@ alias lla="lsd -la"
 alias vim="nvim"
 alias src="source ~/.zshrc"
 
-
-# save package to history
-function savepkg() {
-    echo "$1" >> ~/.dotfiles/scripts/apt_packages.txt
-    echo "Package '$1' added to ~/.dotfiles/scripts/apt_packages.txt"
-}
-
-# function to add commit and push code
-function gitall(){
-  git add .
-  git commit -m "$1"
-  git push
-}
-
 # make a new dir and cd into it
 function mkcd(){
   mkdir $1 && cd $1
 }
 
-# download and add package to history
-function addpkg(){
-  sudo apt install -y $1
-  echo "$1" >> ~/.dotfiles/scripts/apt_packages.txt
-  echo "Package '$1' added to ~/.dotfiles/scripts/apt_packages.txt"
+# run this after "yadm pull"
+function sync-ansible(){
+  ANSIBLE_NOCOWS=1 ansible-playbook -i "localhost," -c local ~/.config/ansible/local.yml --become
 }
 
 export NVM_DIR="$HOME/.nvm"
@@ -160,6 +144,7 @@ case ":$PATH:" in
   *) export PATH="$PNPM_HOME:$PATH" ;;
 esac
 # pnpm end
+
 export PATH=$PATH:/usr/local/go/bin
 export PATH="$PATH:$HOME/bin/terminal_search" # lookup
 export PATH="$PATH:$HOME/bin/generate"
@@ -167,7 +152,6 @@ export PATH="$PATH:$HOME/bin/generate"
 #THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
 export SDKMAN_DIR="$HOME/.sdkman"
 [[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
-
 
 export PATH="$HOME/.local/lib/python3.10/site-packages:$PATH"
 export PATH="$PATH:$HOME/.local/bin"

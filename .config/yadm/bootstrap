@@ -1,21 +1,16 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO_URL="https://github.com/minaboktor2628/dotfiles.git"
-
 echo "[bootstrap] Updating apt and installing Ansible + basics..."
 sudo apt-get update -y
-sudo apt-get install -y --no-install-recommends \
-  ansible git curl ca-certificates software-properties-common
+sudo apt-get install -y --no-install-recommends ansible git curl ca-certificates
 
-# First run with ansible-pull — execute our local.yml against localhost.
-echo "[bootstrap] Running ansible-pull (first run)..."
-ansible-pull \
-  -U "$REPO_URL" \
-  -d "$HOME/.config/ansible" \
+echo "[bootstrap] Running ansible-playbook from local repo..."
+ANSIBLE_NOCOWS=1 ansible-playbook \
   -i "localhost," \
-  "$HOME/.config/ansible/local.yml" \
-  --accept-host-key
+  -c local \
+  --become \
+  "$HOME/.config/ansible/local.yml"
 
 echo "[bootstrap] Done."
 

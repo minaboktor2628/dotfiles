@@ -1,11 +1,13 @@
 ---
 - name: Add Neovim stable PPA
-  apt_repository:
+  ansible.builtin.apt_repository:
     repo: ppa:neovim-ppa/stable
     state: present
     update_cache: yes
+  become: yes
 
 - name: Install Neovim
-  apt:
+  ansible.builtin.apt:
     name: neovim
     state: present
+  become: yes

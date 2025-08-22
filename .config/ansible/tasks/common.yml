@@ -1,12 +1,13 @@
 ---
 # Base packages & utilities
 - name: Update apt cache
-  apt:
+  ansible.builtin.apt:
     update_cache: yes
     cache_valid_time: 3600
+  become: yes
 
 - name: Install common packages
-  apt:
+  ansible.builtin.apt:
     name:
       - build-essential
       - git
@@ -21,30 +22,39 @@
       - jq
       - fzf
     state: present
+  become: yes
 
 # tmux config is managed by yadm in ~/.config/tmux/tmux.conf
 
 - name: Ensure TPM directory exists
-  file:
+  ansible.builtin.file:
     path: "{{ tpm_dir }}"
     state: directory
     mode: "0755"
+    owner: "{{ target_user }}"
+    group: "{{ target_user }}"
 
 - name: Clone TPM (tmux plugin manager)
-  git:
+  ansible.builtin.git:
     repo: "https://github.com/tmux-plugins/tpm"
     dest: "{{ tpm_dir }}"
     version: master
     update: yes
+  become: false
+  vars:
+    ansible_shell_type: sh
 
 # Install tmux plugins (non-interactive)
 - name: Install tmux plugins via TPM
-  become: false
-  shell: |
+  ansible.builtin.shell: |
     tmux start-server
     tmux new-session -d 'bash' || true
     "{{ tpm_dir }}/bin/install_plugins"
     tmux kill-server || true
   args:
     executable: /bin/bash
+  environment:
+    HOME: "{{ target_home }}"
+    TERM: xterm-256color
+  become: false
   changed_when: false
