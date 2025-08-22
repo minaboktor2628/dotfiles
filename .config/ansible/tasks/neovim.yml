@@ -13,33 +13,35 @@
     dest: "{{ nvim_tar }}"
     mode: "0644"
 
-- name: Remove previous versioned dir if present
-  ansible.builtin.file:
-    path: "{{ nvim_dir }}"
-    state: absent
+- block:
+    - name: Ensure target dir exists and is owned by root
+      ansible.builtin.file:
+        path: "{{ nvim_dir }}"
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
 
-- name: Extract Neovim to {{ nvim_root }}
-  ansible.builtin.unarchive:
-    src: "{{ nvim_tar }}"
-    dest: "{{ nvim_root }}"
-    remote_src: yes
+    - name: Install Neovim into {{ nvim_dir }}
+      ansible.builtin.unarchive:
+        src: "{{ nvim_tar }}"
+        dest: "{{ nvim_dir }}"
+        remote_src: yes
+        extra_opts: ["--strip-components=1"]
+      args:
+        creates: "{{ nvim_dir }}/bin/nvim" # idempotent
 
-- name: Rename extracted folder to versioned dir
-  ansible.builtin.command:
-    cmd: "mv {{ nvim_root }}/nvim-{{ nvim_arch }} {{ nvim_dir }}"
-  args:
-    creates: "{{ nvim_dir }}"
+    - name: Symlink nvim into PATH
+      ansible.builtin.file:
+        src: "{{ nvim_dir }}/bin/nvim"
+        dest: "{{ nvim_symlink }}"
+        state: link
+        force: yes
 
-- name: Symlink nvim into PATH
-  ansible.builtin.file:
-    src: "{{ nvim_dir }}/bin/nvim"
-    dest: "{{ nvim_symlink }}"
-    state: link
-    force: yes
-
-- name: Stable /opt/nvim -> {{ nvim_dir }} symlink
-  ansible.builtin.file:
-    src: "{{ nvim_dir }}"
-    dest: "{{ nvim_root }}/nvim"
-    state: link
-    force: yes
+    - name: Stable /opt/nvim -> {{ nvim_dir }} symlink
+      ansible.builtin.file:
+        src: "{{ nvim_dir }}"
+        dest: "{{ nvim_root }}/nvim"
+        state: link
+        force: yes
+  become: yes
