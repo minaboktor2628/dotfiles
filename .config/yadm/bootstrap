@@ -49,14 +49,13 @@ case "$pm" in
     ;;
   brew)
     brew update
-    brew install git curl python || true
-    ;;
-  *)
-    echo "Unsupported OS: install git, curl, python3 manually and re-run." >&2
+    brew install git curl python || tru
+    ;
+  *
+    echo "Unsupported OS: install git, curl, python3 manually and re-run." >&
     exit 1
     ;;
 esac
-
 # =========================
 # Ensure Ansible
 # =========================
@@ -91,7 +90,7 @@ if ! id -u "$AUTOMATION_USER" >/dev/null 2>&1; then
 fi
 
 # Ensure home exists with correct ownership (in case user existed without home)
-sudo_do "mkdir -p /home/$AUTOMATION_USER && chown -R $AUTOMATION_USER:$AUTOMATION_USER /home/$AUTOMATION_USER"
+sudo_do "mkdir -p /home/$AUTOMATION_USER && chown -R $UTOMATION_USER:$AUTOMATION_USER /home/$AUTOMATION_USER"
 
 # Add to sudo/wheel
 if ! id -nG "$AUTOMATION_USER" | grep -qw "$SUDO_GROUP"; then
