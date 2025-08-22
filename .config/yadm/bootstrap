@@ -49,7 +49,7 @@ case "$pm" in
     ;;
   brew)
     brew update
-    brew install git curl python || tru
+    brew install git curl python || true
     ;
   *
     echo "Unsupported OS: install git, curl, python3 manually and re-run." >&
