@@ -168,9 +168,9 @@ generate_and_upload_key() {
 }
 
 # Keys for both users
-generate_and_upload_key "minaboktor" "minaboktor@$(hostname)"
-generate_and_upload_key "$AUTOMATION_USER" "$AUTOMATION_USER@$(hostname)"
-
+# generate_and_upload_key "minaboktor" "minaboktor@$(hostname)"
+# generate_and_upload_key "$AUTOMATION_USER" "$AUTOMATION_USER@$(hostname)"
+#
 # =========================
 # First run now (as the automation user)
 # =========================
