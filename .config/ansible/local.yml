@@ -96,10 +96,25 @@
         group: "{{ user }}"
         mode: "0755"
 
+    # Debian/Ubuntu: install each package individually and keep going
     - name: Install base packages (Debian/Ubuntu)
-      package:
-        name: "{{ base_packages_debian }}"
+      apt:
+        name: "{{ item }}"
         state: present
+        update_cache: yes
+      loop: "{{ base_packages_debian }}"
+      register: deb_pkg_results
+      ignore_errors: true
+      when: ansible_facts['os_family'] == 'Debian'
+
+    - name: Report package install summary (Debian/Ubuntu)
+      vars:
+        failed: "{{ deb_pkg_results.results | selectattr('failed','defined') | map(attribute='item') | list }}"
+        succeeded: "{{ deb_pkg_results.results | rejectattr('failed','defined') | map(attribute='item') | list }}"
+      debug:
+        msg:
+          - "Installed OK: {{ succeeded | join(', ') if succeeded|length else 'none' }}"
+          - "Failed: {{ failed | join(', ') if failed|length else 'none' }}"
       when: ansible_facts['os_family'] == 'Debian'
 
     - name: Install base packages (RedHat/Fedora/CentOS/RHEL)

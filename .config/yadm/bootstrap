@@ -52,7 +52,7 @@ case "$pm" in
     brew install git curl python || true
     ;;
   *)
-    echo "Unsupported OS: install git, curl, python3 manually and re-run." >&
+    echo "Unsupported OS: install git, curl, python3 manually and re-run." >&2
     exit 1
     ;;
 esac
@@ -90,7 +90,7 @@ if ! id -u "$AUTOMATION_USER" >/dev/null 2>&1; then
 fi
 
 # Ensure home exists with correct ownership (in case user existed without home)
-sudo_do "mkdir -p /home/$AUTOMATION_USER && chown -R $UTOMATION_USER:$AUTOMATION_USER /home/$AUTOMATION_USER"
+sudo_do "mkdir -p /home/$AUTOMATION_USER && chown -R $AUTOMATION_USER:$AUTOMATION_USER /home/$AUTOMATION_USER"
 
 # Add to sudo/wheel
 if ! id -nG "$AUTOMATION_USER" | grep -qw "$SUDO_GROUP"; then
@@ -121,6 +121,55 @@ sudo_do "touch /var/log/ansible-pull.log && chown $AUTOMATION_USER:$AUTOMATION_U
 
 # Ensure destination dir exists and is writable by the automation user
 sudo_do "mkdir -p '$DEST_DIR' && chown -R $AUTOMATION_USER:$AUTOMATION_USER '$(dirname "$DEST_DIR")'"
+
+# =========================
+# Load secrets (GitHub token)
+# =========================
+if [ -f "$HOME/.config/yadm/secrets/github.env" ]; then
+  export $(grep -v '^#' "$HOME/.config/yadm/secrets/github.env" | xargs)
+fi
+
+if [ -z "${GITHUB_TOKEN:-}" ]; then
+  echo "ERROR: GITHUB_TOKEN is not set. Make sure yadm secrets decrypted github.env" >&2
+  exit 1
+fi
+
+# =========================
+# Trust GitHub host key for ansible user
+# =========================
+sudo_do "mkdir -p /home/$AUTOMATION_USER/.ssh && chown $AUTOMATION_USER:$AUTOMATION_USER /home/$AUTOMATION_USER/.ssh && chmod 700 /home/$AUTOMATION_USER/.ssh"
+sudo_do "runuser -l $AUTOMATION_USER -c 'ssh-keyscan github.com >> ~/.ssh/known_hosts'"
+
+# =========================
+# Generate SSH keys & upload to GitHub
+# =========================
+generate_and_upload_key() {
+  local USERNAME=$1
+  local COMMENT=$2
+  local HOME_DIR=$(eval echo ~$USERNAME)
+  local SSH_DIR="$HOME_DIR/.ssh"
+  local KEY_PATH="$SSH_DIR/id_ed25519"
+
+  sudo_do "mkdir -p $SSH_DIR && chown $USERNAME:$USERNAME $SSH_DIR && chmod 700 $SSH_DIR"
+
+  if [ ! -f "$KEY_PATH" ]; then
+    echo "Generating SSH key for $USERNAME..."
+    sudo_do "runuser -l $USERNAME -c 'ssh-keygen -t ed25519 -C \"$COMMENT\" -f $KEY_PATH -N \"\"'"
+  fi
+
+  PUBKEY=$(sudo cat "$KEY_PATH.pub")
+
+  echo "Uploading $USERNAME key to GitHub..."
+  curl -s -H "Authorization: token $GITHUB_TOKEN" \
+       -H "Content-Type: application/json" \
+       -d "{\"title\":\"$USERNAME@$(hostname)\",\"key\":\"$PUBKEY\"}" \
+       https://api.github.com/user/keys \
+       | grep -E 'id|message'
+}
+
+# Keys for both users
+generate_and_upload_key "minaboktor" "minaboktor@$(hostname)"
+generate_and_upload_key "$AUTOMATION_USER" "$AUTOMATION_USER@$(hostname)"
 
 # =========================
 # First run now (as the automation user)
