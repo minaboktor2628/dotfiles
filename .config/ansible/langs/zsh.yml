@@ -1,0 +1,31 @@
+---
+- name: Install zsh
+  apt:
+    name: zsh
+    state: present
+
+- name: Install oh-my-zsh (if not already installed)
+  become: false
+  shell: |
+    set -e
+    export ZSH="$HOME/.oh-my-zsh"
+    if [ ! -d "$ZSH" ]; then
+      RUNZSH=no KEEP_ZSHRC=yes \
+      sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+    fi
+  args:
+    executable: /bin/bash
+  changed_when: false
+
+- name: Set default shell to zsh for current user
+  become: yes
+  user:
+    name: "{{ ansible_env.USER }}"
+    shell: /usr/bin/zsh
+
+- name: Install zsh-autosuggestions plugin
+  git:
+    repo: https://github.com/zsh-users/zsh-autosuggestions
+    dest: "{{ ansible_env.HOME }}/.oh-my-zsh/custom/plugins/zsh-autosuggestions"
+    version: master
+    update: yes

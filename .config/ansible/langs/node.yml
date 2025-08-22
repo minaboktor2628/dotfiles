@@ -1,0 +1,31 @@
+---
+- name: Install NVM
+  become: false
+  shell: |
+    set -e
+    export NVM_DIR="$HOME/.nvm"
+    if [ ! -d "$NVM_DIR" ]; then
+      curl -fsSL "https://raw.githubusercontent.com/nvm-sh/nvm/{{ nvm_version }}/install.sh" | bash
+    fi
+  args:
+    executable: /bin/bash
+
+- name: Install Node LTS via NVM and set default
+  become: false
+  shell: |
+    set -e
+    export NVM_DIR="$HOME/.nvm"
+    [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+    nvm install "{{ node_lts }}"
+    nvm alias default "{{ node_lts }}"
+    nvm use default
+  args:
+    executable: /bin/bash
+
+- name: Install pnpm globally via npm
+  become: false
+  shell: |
+    set -e
+    npm i -g pnpm
+  args:
+    executable: /bin/bash
