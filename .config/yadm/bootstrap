@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO_URL="https://github.com/minaboktor2628/dotfiles.git}"
+REPO_URL="https://github.com/minaboktor2628/dotfiles.git"
 
 echo "[bootstrap] Updating apt and installing Ansible + basics..."
 sudo apt-get update -y
