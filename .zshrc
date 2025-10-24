@@ -160,4 +160,6 @@ export PATH="$PATH:$HOME/.local/bin"
 # export DISPLAY=$(awk '/nameserver/ {print $2; exit}' /etc/resolv.conf):0
 
 export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
-. "/home/minaboktor/.deno/env"
+# . "/home/minaboktor/.deno/env"
+export DENO_INSTALL="$HOME/.deno"; export PATH="$DENO_INSTALL/bin:$PATH"
+export PATH="/home/minaboktor/.cargo/bin:$PATH"

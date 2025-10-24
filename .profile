@@ -26,4 +26,7 @@ if [ -d "$HOME/.local/bin" ] ; then
     PATH="$HOME/.local/bin:$PATH"
 fi
 . "$HOME/.cargo/env"
-. "/home/minaboktor/.deno/env"
+
+# remap caps lock to esc
+setxkbmap -option caps:escape
+

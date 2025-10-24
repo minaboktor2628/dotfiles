@@ -3,7 +3,7 @@ return {
   lazy = false, -- load on startup
   init = function()
     vim.g.tex_flavor = "latex"
-    vim.g.vimtex_view_method = "zathura"
+    -- vim.g.vimtex_view_method = "open"
     vim.g.vimtex_quickfix_mode = 0
     vim.g.vimtex_compiler_method = "latexmk"
     vim.g.vimtex_compiler_latexmk = {
@@ -18,9 +18,14 @@ return {
         "-pdf",
         "-interaction=nonstopmode",
         "-synctex=1",
-        "-auxdir=aux",
+        -- "-auxdir=aux",
         -- "-outdir=build",
       },
     }
+
+    -------------------------------------------------------------------
+    -- vimtex completion tuning (from the docs you found)
+    -------------------------------------------------------------------
+    -- simple mode plays nicer with completion engines like nvim-cmp
   end,
 }

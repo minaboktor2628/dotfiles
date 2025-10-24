@@ -38,6 +38,7 @@ return {
         "pyright",
         "eslint",
         "ts_ls",
+        "gh_actions_ls",
       },
     })
 
@@ -48,7 +49,6 @@ return {
         "isort", -- python formatter
         "black", -- python formatter
         "pylint",
-        "eslint_d",
       },
     })
   end,

@@ -16,6 +16,8 @@ return {
     "hrsh7th/cmp-vsnip",
     "hrsh7th/vim-vsnip",
     "hrsh7th/cmp-path",
+    "hrsh7th/cmp-omni",
+    "onsails/lspkind-nvim",
     "hrsh7th/nvim-cmp",
   },
   config = function()
@@ -209,6 +211,7 @@ return {
         { name = "vsnip" },
         { name = "luasnip" },
         { name = "path" },
+        { name = "omni" },
       },
     })
     local capabilities = cmp_nvim_lsp.default_capabilities()
@@ -237,10 +240,10 @@ return {
       filetypes = { "html", "typescriptreact", "javascriptreact", "css", "sass", "scss", "less", "svelte" },
     })
 
-    vim.lsp.config("eslint", {
-      filetypes = { "html", "typescriptreact", "javascriptreact", "css", "sass", "scss", "less", "svelte" },
-    })
-
+    -- vim.lsp.config("eslint", {
+    --   filetypes = { "html", "typescriptreact", "javascriptreact", "css", "sass", "scss", "less", "svelte" },
+    -- })
+    --
     vim.lsp.config("lua_ls", {
       settings = {
         Lua = {
