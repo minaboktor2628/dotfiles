@@ -1,9 +1,12 @@
 return {
   "nvim-treesitter/nvim-treesitter",
-  event = { "BufReadPre", "BufNewFile" },
+  lazy = false,
   build = ":TSUpdate",
   dependencies = {
-    "windwp/nvim-ts-autotag",
+    {
+      "windwp/nvim-ts-autotag",
+      opts = {},
+    },
     {
       "nvim-treesitter/nvim-treesitter-context",
       opts = {
@@ -15,25 +18,12 @@ return {
     },
   },
   config = function()
-    -- import nvim-treesitter plugin
     local treesitter = require("nvim-treesitter.configs")
-    require("nvim-ts-autotag").setup({
-      opts = {
-        -- Defaults
-        enable_close = true, -- Auto close tags
-        enable_rename = true, -- Auto rename pairs of tags
-        enable_close_on_slash = false, -- Auto close on trailing </
-      },
-    })
 
-    -- configure treesitter
-    treesitter.setup({ -- enable syntax highlighting
-      highlight = { enable = true, additional_vim_regex_highlighting = { "misp" } },
-      -- enable indentation
+    treesitter.setup({
+      highlight = { enable = true },
       indent = { enable = true },
-      -- enable autotagging (w/ nvim-ts-autotag plugin)
-      autotag = { enable = true },
-      -- ensure these language parsers are installed
+
       ensure_installed = {
         "json",
         "javascript",
@@ -57,6 +47,7 @@ return {
         "racket",
         "c",
       },
+
       incremental_selection = {
         enable = true,
         keymaps = {
@@ -67,5 +58,7 @@ return {
         },
       },
     })
+
+    require("nvim-ts-autotag").setup()
   end,
 }

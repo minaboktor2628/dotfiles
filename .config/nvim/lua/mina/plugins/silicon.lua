@@ -20,9 +20,11 @@ return {
     vim.keymap.set("v", "<leader>sc", function()
       require("nvim-silicon").clip()
     end, { desc = "Screenshot to clipboard", noremap = true, silent = true })
+
     vim.keymap.set("v", "<leader>sf", function()
       require("nvim-silicon").file()
     end, { desc = "screenshot to file", noremap = true, silent = true })
+
     vim.keymap.set("v", "<leader>ss", function()
       require("nvim-silicon").shoot()
     end, { desc = "screenshot", noremap = true, silent = true })

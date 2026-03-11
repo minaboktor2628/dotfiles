@@ -35,20 +35,36 @@ return {
         end,
       },
       mapping = cmp.mapping.preset.insert({
-        ["<C-k>"] = cmp.mapping.select_prev_item(), -- previous suggestion
-        ["<C-j>"] = cmp.mapping.select_next_item(), -- next suggestion
+        ["<C-n>"] = cmp.mapping.select_next_item(), -- Select the [n]ext item
+        ["<C-p>"] = cmp.mapping.select_prev_item(), -- Select the [p]revious item
+
+        -- Scroll the documentation window [b]ack / [f]orward
         ["<C-b>"] = cmp.mapping.scroll_docs(-4),
         ["<C-f>"] = cmp.mapping.scroll_docs(4),
+        ["<C-y>"] = cmp.mapping.confirm({ select = true }), -- Accept ([y]es) the completion.
         ["<C-Space>"] = cmp.mapping.complete(), -- show completion suggestions
         ["<C-e>"] = cmp.mapping.abort(), -- close completion window
-        ["<CR>"] = cmp.mapping.confirm({ select = false }),
+
+        ["<C-l>"] = cmp.mapping(function() -- <c-l> will move you to the right of each of the expansion locations.
+          if luasnip.expand_or_locally_jumpable() then
+            luasnip.expand_or_jump()
+          end
+        end, { "i", "s" }),
+
+        ["<C-h>"] = cmp.mapping(function() -- <c-h> is similar, except moving you backwards.
+          if luasnip.locally_jumpable(-1) then
+            luasnip.jump(-1)
+          end
+        end, { "i", "s" }),
       }),
       -- sources for autocompletion
       sources = cmp.config.sources({
-        { name = "nvim_lsp"},
+        { name = "nvim_lsp" },
         { name = "luasnip" }, -- snippets
         { name = "buffer" }, -- text within current buffer
         { name = "path" }, -- file system paths
+        { name = "vsnip" },
+        { name = "omni" },
       }),
 
       -- configure lspkind for vs-code like pictograms in completion menu

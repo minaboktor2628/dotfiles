@@ -22,10 +22,5 @@ return {
         -- "-outdir=build",
       },
     }
-
-    -------------------------------------------------------------------
-    -- vimtex completion tuning (from the docs you found)
-    -------------------------------------------------------------------
-    -- simple mode plays nicer with completion engines like nvim-cmp
   end,
 }
