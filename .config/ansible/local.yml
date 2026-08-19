@@ -29,6 +29,9 @@
     - name: Common base
       ansible.builtin.include_tasks: "tasks/common.yml"
 
+    - name: Create SSH key
+      ansible.builtin.include_tasks: "tasks/ssh.yml"
+
     - name: Install tmux and TPM
       ansible.builtin.include_tasks: "tasks/tmux.yml"
 

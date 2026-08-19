@@ -1,0 +1,31 @@
+---
+- name: Ensure OpenSSH client is installed
+  ansible.builtin.apt:
+    name: openssh-client
+    state: present
+  become: yes
+
+- name: Ensure ~/.ssh exists
+  ansible.builtin.file:
+    path: "{{ target_home }}/.ssh"
+    state: directory
+    mode: "0700"
+    owner: "{{ target_user }}"
+    group: "{{ target_user }}"
+
+- name: Generate default SSH key if missing
+  ansible.builtin.command:
+    cmd: >-
+      ssh-keygen -t {{ ssh_key_type | default('ed25519') }}
+      -f {{ ssh_key_path | default(target_home + '/.ssh/id_ed25519') }}
+      -N ""
+      -C "{{ ssh_key_comment | default(target_user + '@' + ansible_hostname) }}"
+  args:
+    creates: "{{ ssh_key_path | default(target_home + '/.ssh/id_ed25519') }}"
+  become: false
+
+- name: Show generated public key path
+  ansible.builtin.debug:
+    msg:
+      - "SSH key available at {{ ssh_key_path | default(target_home + '/.ssh/id_ed25519') }}"
+      - "Public key: {{ ssh_key_path | default(target_home + '/.ssh/id_ed25519') }}.pub"
