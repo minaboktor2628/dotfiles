@@ -1,8 +1,8 @@
 ---
 # Defaultable var for Node.js major (or full) version
-- name: Set desired Node.js version (default 22)
+- name: Set desired Node.js version (default 24)
   ansible.builtin.set_fact:
-    node_version: "{{ node_version | default('22') }}"
+    node_version: "{{ node_version | default('24') }}"
   changed_when: false
 
 # Install NVM once
