@@ -35,6 +35,9 @@
     - name: Install fonts
       ansible.builtin.include_tasks: "tasks/fonts.yml"
 
+    - name: Install kitty terminal
+      ansible.builtin.include_tasks: "tasks/kitty.yml"
+
     - name: Install tmux and TPM
       ansible.builtin.include_tasks: "tasks/tmux.yml"
 
