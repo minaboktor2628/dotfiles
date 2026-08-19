@@ -23,6 +23,7 @@
       - fzf
       - tar
       - gzip
+      - tree
     state: present
   become: yes
 

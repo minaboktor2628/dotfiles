@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-set -euo pipefail
 
 echo "[bootstrap] Updating apt and installing Ansible + basics..."
 sudo apt-get update -y
