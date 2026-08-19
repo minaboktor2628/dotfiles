@@ -3,9 +3,12 @@
     nvim_version: "v0.12.4"
     nvim_arch: "{{ (ansible_architecture == 'aarch64') | ternary('linux-arm64','linux-x86_64') }}"
     nvim_root: "/opt"
-    nvim_dir: "{{ nvim_root }}/nvim-{{ nvim_version | regex_replace('^v', '') }}"
     nvim_symlink: "/usr/local/bin/nvim"
     nvim_tar: "/tmp/nvim-{{ (ansible_architecture == 'aarch64') | ternary('linux-arm64','linux-x86_64') }}.tar.gz"
+
+- name: Install Neovim — derive install paths
+  ansible.builtin.set_fact:
+    nvim_dir: "{{ nvim_root }}/nvim-{{ nvim_version | regex_replace('^v', '') }}"
 
 - name: Download Neovim {{ nvim_version }} tarball
   ansible.builtin.get_url:

@@ -38,19 +38,18 @@
   environment:
     HOME: "{{ target_home }}"
     USER: "{{ target_user }}"
-
 # pnpm
-- name: Install pnpm globally via npm
-  become: yes
-  become_user: "{{ target_user }}"
-  ansible.builtin.shell: |
-    set -e
-    export NVM_DIR="{{ target_home }}/.nvm"
-    . "$NVM_DIR/nvm.sh"
-    nvm use default >/dev/null
-    npm i -g pnpm
-  args:
-    executable: /bin/bash
-  environment:
-    HOME: "{{ target_home }}"
-    USER: "{{ target_user }}"
+# - name: Install pnpm globally via npm
+#   become: yes
+#   become_user: "{{ target_user }}"
+#   ansible.builtin.shell: |
+#     set -e
+#     export NVM_DIR="{{ target_home }}/.nvm"
+#     . "$NVM_DIR/nvm.sh"
+#     nvm use default >/dev/null
+#     npm i -g pnpm
+#   args:
+#     executable: /bin/bash
+#   environment:
+#     HOME: "{{ target_home }}"
+#     USER: "{{ target_user }}"
