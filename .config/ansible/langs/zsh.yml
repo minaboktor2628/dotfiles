@@ -16,36 +16,33 @@
     name: "{{ target_user }}"
     shell: /usr/bin/zsh
 
-# Install Oh My Zsh (non-interactive), as the target user
-- name: Install oh-my-zsh (if not already installed)
+- name: Ensure zsh plugin directories exist
   become: yes
   become_user: "{{ target_user }}"
-  ansible.builtin.shell: |
-    set -e
-    export ZSH="{{ target_home }}/.oh-my-zsh"
-    if [ ! -d "$ZSH" ]; then
-      RUNZSH=no KEEP_ZSHRC=yes CHSH=no \
-      sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-    fi
-  args:
-    executable: /bin/bash
-    creates: "{{ target_home }}/.oh-my-zsh/oh-my-zsh.sh"
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - "{{ target_home }}/.local/share/zsh/plugins"
+    - "{{ target_home }}/.config/zsh/plugins"
 
-# Plugins — install both, as the target user (no root-owned files in $HOME)
-- name: Install zsh-autosuggestions plugin
+- name: Install standalone zsh plugins
   become: yes
   become_user: "{{ target_user }}"
   ansible.builtin.git:
-    repo: https://github.com/zsh-users/zsh-autosuggestions.git
-    dest: "{{ target_home }}/.oh-my-zsh/custom/plugins/zsh-autosuggestions"
+    repo: "{{ item.repo }}"
+    dest: "{{ target_home }}/.local/share/zsh/plugins/{{ item.name }}"
     version: master
     update: yes
+  loop:
+    - name: zsh-autosuggestions
+      repo: https://github.com/zsh-users/zsh-autosuggestions.git
+    - name: zsh-syntax-highlighting
+      repo: https://github.com/zsh-users/zsh-syntax-highlighting.git
 
-- name: Install zsh-syntax-highlighting plugin (must be last in plugins=())
-  become: yes
-  become_user: "{{ target_user }}"
-  ansible.builtin.git:
-    repo: https://github.com/zsh-users/zsh-syntax-highlighting.git
-    dest: "{{ target_home }}/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting"
-    version: master
-    update: yes
+- name: Show zsh plugin locations
+  ansible.builtin.debug:
+    msg:
+      - "Put tracked custom plugin files in {{ target_home }}/.config/zsh/plugins"
+      - "Standalone cloned repos live in {{ target_home }}/.local/share/zsh/plugins"
