@@ -32,6 +32,9 @@
     - name: Create SSH key
       ansible.builtin.include_tasks: "tasks/ssh.yml"
 
+    - name: Install fonts
+      ansible.builtin.include_tasks: "tasks/fonts.yml"
+
     - name: Install tmux and TPM
       ansible.builtin.include_tasks: "tasks/tmux.yml"
 
