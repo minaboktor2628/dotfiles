@@ -1,3 +1,6 @@
+autoload -U colors && colors
+setopt PROMPT_SUBST
+
 for fzf_script in \
   /usr/share/doc/fzf/examples/completion.zsh \
   /usr/share/fzf/completion.zsh \
@@ -30,3 +33,19 @@ fi
 
 [ -r "$ZSH_PLUGIN_DIR/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ] && \
   source "$ZSH_PLUGIN_DIR/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+
+git_prompt_info() {
+  local ref dirty
+
+  ref=$(command git symbolic-ref --quiet --short HEAD 2>/dev/null) || \
+    ref=$(command git rev-parse --short HEAD 2>/dev/null) || return
+
+  if ! command git diff --quiet --ignore-submodules --cached 2>/dev/null || \
+     ! command git diff --quiet --ignore-submodules 2>/dev/null; then
+    dirty="%{$fg[yellow]%}%1{✗%}"
+  fi
+
+  echo "%{$fg_bold[blue]%}git:(%{$fg[red]%}${ref}%{$fg[blue]%})${dirty}"
+}
+
+PROMPT='%(?:%{$fg_bold[green]%}%1{➜%} :%{$fg_bold[red]%}%1{➜%} ) %{$fg[cyan]%}%c%{$reset_color%} $(git_prompt_info) '
