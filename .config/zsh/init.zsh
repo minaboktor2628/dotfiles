@@ -21,11 +21,13 @@ done
   source "$ZSH_PLUGIN_DIR/zsh-autosuggestions/zsh-autosuggestions.zsh"
 
 if [ -d "$ZSH_CONFIG_DIR/plugins" ]; then
-  for plugin_file in \
-    "$ZSH_CONFIG_DIR"/plugins/*.zsh \
-    "$ZSH_CONFIG_DIR"/plugins/*/*.plugin.zsh \
-    "$ZSH_CONFIG_DIR"/plugins/*/*.zsh
-  do
+  plugin_files=(
+    "$ZSH_CONFIG_DIR"/plugins/*.zsh(N)
+    "$ZSH_CONFIG_DIR"/plugins/*/*.plugin.zsh(N)
+    "$ZSH_CONFIG_DIR"/plugins/*/*.zsh(N)
+  )
+
+  for plugin_file in "${plugin_files[@]}"; do
     [ -r "$plugin_file" ] || continue
     source "$plugin_file"
   done
