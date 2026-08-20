@@ -24,5 +24,6 @@
       - tar
       - gzip
       - tree
+      - tree-sitter-cli
     state: present
   become: yes
