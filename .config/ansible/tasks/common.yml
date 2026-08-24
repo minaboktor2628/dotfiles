@@ -25,5 +25,6 @@
       - gzip
       - tree
       - tree-sitter-cli
+      - git-delta
     state: present
   become: yes
