@@ -11,7 +11,7 @@
     state: directory
     mode: "0700"
     owner: "{{ target_user }}"
-    group: "{{ target_user }}"
+    group: "{{ target_group }}"
 
 - name: Generate default SSH key if missing
   ansible.builtin.command:

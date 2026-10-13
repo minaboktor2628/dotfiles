@@ -11,7 +11,7 @@
     state: directory
     mode: "0755"
     owner: "{{ target_user }}"
-    group: "{{ target_user }}"
+    group: "{{ target_group }}"
 
 - name: Download JetBrainsMono Nerd Font archive
   ansible.builtin.get_url:

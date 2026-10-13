@@ -11,6 +11,7 @@
     # Resolve your actual user/home even if some tasks escalate later.
     target_user: "{{ lookup('env','USER') }}"
     target_home: "{{ lookup('env','HOME') }}"
+    target_group: "{{ lookup('pipe', 'id -gn') }}"
 
     # Tooling versions/paths
     tpm_dir: "{{ target_home }}/.config/tmux/plugins/tpm"
@@ -18,10 +19,18 @@
     node_lts: "lts/*"
 
   pre_tasks:
+    - name: Refuse to bootstrap root by accident
+      ansible.builtin.assert:
+        that:
+          - target_user != "root"
+          - target_home != "/root"
+        fail_msg: "Run this playbook as your normal user with ansible-playbook -K local.yml, not with sudo ansible-playbook."
+
     - name: Show who/where we are installing to
       ansible.builtin.debug:
         msg:
           - "user: {{ target_user }}"
+          - "group: {{ target_group }}"
           - "home: {{ target_home }}"
 
   tasks:

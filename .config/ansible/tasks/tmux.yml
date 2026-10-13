@@ -7,7 +7,7 @@
     state: directory
     mode: "0755"
     owner: "{{ target_user }}"
-    group: "{{ target_user }}"
+    group: "{{ target_group }}"
 
 - name: Clone TPM (tmux plugin manager)
   ansible.builtin.git:
@@ -21,10 +21,24 @@
 
 - name: Install tmux plugins via TPM
   ansible.builtin.shell: |
+    socket="ansible-tpm-$$"
+    wrapper_dir="$(mktemp -d)"
+    tmux_bin="$(command -v tmux)"
+    trap 'tmux -L "$socket" kill-server >/dev/null 2>&1 || true; rm -rf "$wrapper_dir"' EXIT
+
+    cat > "$wrapper_dir/tmux" <<'EOF'
+    #!/bin/sh
+    exec "$ANSIBLE_TMUX_BIN" -L "$ANSIBLE_TPM_SOCKET" "$@"
+    EOF
+    chmod +x "$wrapper_dir/tmux"
+
+    export ANSIBLE_TMUX_BIN="$tmux_bin"
+    export ANSIBLE_TPM_SOCKET="$socket"
+    export PATH="$wrapper_dir:$PATH"
+
     tmux start-server
     tmux new-session -d 'bash' || true
-    "{{ tpm_dir }}/bin/install_plugins"
-    tmux kill-server || true
+    TMUX="" "{{ tpm_dir }}/bin/install_plugins"
   args:
     executable: /bin/bash
   environment:

@@ -26,5 +26,6 @@
       - tree
       - tree-sitter-cli
       - git-delta
+      - lazygit
     state: present
   become: yes

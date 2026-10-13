@@ -10,11 +10,11 @@
     update_cache: yes
 
 # Change default shell (kept separate from installer script)
-- name: Set default shell to zsh for {{ target_user }}
-  become: yes
-  ansible.builtin.user:
-    name: "{{ target_user }}"
-    shell: /usr/bin/zsh
+# - name: Set default shell to zsh for {{ target_user }}
+#   become: yes
+#   ansible.builtin.user:
+#     name: "{{ target_user }}"
+#     shell: /usr/bin/zsh
 
 - name: Install oh-my-zsh (if not already installed)
   become: yes

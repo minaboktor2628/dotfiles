@@ -5,6 +5,14 @@
     node_version: "{{ node_version | default('24') }}"
   changed_when: false
 
+- name: Ensure NVM directory exists
+  ansible.builtin.file:
+    path: "{{ target_home }}/.nvm"
+    state: directory
+    mode: "0755"
+    owner: "{{ target_user }}"
+    group: "{{ target_group }}"
+
 # Install NVM once
 - name: Install NVM
   become: yes
